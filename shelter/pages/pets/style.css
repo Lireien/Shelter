@@ -396,7 +396,7 @@ body.locked {
 }
 .button.inactive {
   border: 2px solid var(--text-grey);
-  color: var(--text-grey)
+  color: var(--text-grey);
 }
 .button:hover {
   background-color: var(--color-primary-light);
@@ -411,7 +411,6 @@ body.locked {
   cursor: auto;
   background-color: var(--color-primary);
 }
-
 @media (max-width: 1279px) {
   .main {
     padding-bottom: 76px;
