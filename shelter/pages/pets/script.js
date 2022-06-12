@@ -199,66 +199,139 @@ const petsCardsWrapper = document.querySelector('.friends-cards__wrapper');
 const currentPageElement = document.querySelector('.current__btn');
 const btnForwardEl = document.querySelector('.forward__btn');
 
-let cardsField = setSliderSize();
-// let startPage = 1;
-let currentPage = 1;
-currentPageElement.innerHTML = currentPage;
+const petsArr = JSON.parse(petsData);
 
-function makeMaxList(data) {
-  let newArr = [];
-  for (let i = 0; i < 6; i++) {
-    const newPets = data;
-    for (let j = data.length; j > 0; j--) {
-      let random = randomizer(j);
-      let randomElement = newPets.splice(random, 1)[0];
-      newPets.push(randomElement);
+console.log(petsArr);
+
+const shuffleArrayHandler = (petsArr) => {
+  const random = (a, b) => {
+    return Math.floor(a + Math.random() * (b + 1 - a));
+  };
+
+  const array = [random(0, 7)];
+
+  while (array.length < 48) {
+    let newItem = random(0, 7);
+    const pageNumber8Cards = Math.floor(array.length / 8);
+    const pageNumber6Cards = Math.floor(array.length / 6);
+    const pageNumber3Cards = Math.floor(array.length / 3);
+    const page8 = array.slice(pageNumber8Cards * 8);
+    const page6 = array.slice(pageNumber6Cards * 6);
+    const page3 = array.slice(pageNumber3Cards * 3);
+    if (
+      !page8.includes(newItem) &&
+      !page6.includes(newItem) &&
+      !page3.includes(newItem) &&
+      array.filter((it) => it === newItem).length < 6
+    ) {
+      array.push(newItem);
     }
-    newArr = [...newArr, ...newPets];
   }
-  console.log(newArr);
-  return newArr;
-}
 
-function cardCreator(list) {
-  const maxPetsList = sort863Elements(makeMaxList(list));
-  let str = '';
-  cardsField = setSliderSize();
-  let startFrom = cardsField * (currentPage - 1);
-  for (let i = startFrom; i < startFrom + cardsField; i++) {
-    str += `<div class="friends-card" data-name="${maxPetsList[i].name}">
+  return array.map((it) => petsArr[it]);
+};
+
+const screenWidth =
+  window.innerWidth ||
+  document.documentElement.clientWidth ||
+  document.body.clientWidth;
+
+const appState = {
+  page: 1,
+  itemsPerPage: screenWidth < 768 ? 3 : screenWidth > 1280 ? 8 : 6,
+};
+
+const shuffledPets = shuffleArrayHandler(petsArr);
+
+const renderCardsHandler = (pageNumber, itemsPerPage, items) => {
+  const minPage = 1;
+  const maxPage = Math.ceil(48 / appState.itemsPerPage);
+  const target = document.querySelector('.friends-cards__wrapper');
+
+  target.innerHTML = '';
+
+  const renderedItemEls = items.slice(
+    (pageNumber - 1) * itemsPerPage,
+    pageNumber * itemsPerPage
+  );
+
+  renderedItemEls.forEach((el) => {
+    const div = document.createElement('div');
+    div.className = 'friends-card';
+    div.innerHTML = `
     <div class="card__img-wrapper">
-      <img
-        src="${maxPetsList[i].img}"
-        alt="${maxPetsList[i].name}"
-        class="pets__img"
-      />
-    </div>
-    <h4 class="card__name">${maxPetsList[i].name}</h4>
-    <a href="##" class="anchor card__btn">Learn more</a>
-  </div>`;
-  }
-  petsCardsWrapper.innerHTML = str;
-}
-cardCreator(dataPets);
+    <img
+      src="${el.img}"
+      alt="${el.name}"
+      class="pets__img"
+    />
+  </div>
+  <h4 class="card__name">${el.name}</h4>
+  <a href="" class="anchor card__btn">Learn more</a>
+    `;
+    target.appendChild(div);
+  });
 
-function setSliderSize() {
-  let width = document.documentElement.clientWidth;
-  if (width > 1279) {
-    return 8;
-  } else if (width < 768) {
-    return 3;
-  } else {
-    return 6;
-  }
-}
-function randomizer(n) {
-  let num;
-  return (num = Math.floor(Math.random() * n));
-}
+  const pageButtons = document.querySelectorAll('.pagination__btn');
+  pageButtons.forEach((b) => {
+    if (
+      b.classList.contains('double-back__btn') ||
+      b.classList.contains('back__btn')
+    ) {
+      if (appState.page === minPage) {
+        b.setAttribute('disabled', 'disabled');
+        b.classList.remove('active');
+        b.classList.add('inactive');
+      } else {
+        b.removeAttribute('disabled');
+        b.classList.remove('inactive');
+        b.classList.add('active');
+      }
+    }
+    if (
+      b.classList.contains('forward__btn') ||
+      b.classList.contains('double-forward__btn')
+    ) {
+      if (appState.page === maxPage) {
+        b.setAttribute('disabled', 'disabled');
+        b.classList.remove('active');
+        b.classList.add('inactive');
+      } else {
+        b.removeAttribute('disabled');
+        b.classList.remove('inactive');
+        b.classList.add('active');
+      }
+    }
+  });
 
-function shuffleCards(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
+  const pageNumberBtn = document.querySelector('.current__btn');
+  pageNumberBtn.innerText = appState.page;
+};
+
+const paginationBtns = document.querySelectorAll('.pagination__btn');
+
+paginationBtns.forEach((b) => {
+  const minPage = 1;
+  const maxPage = Math.ceil(48 / appState.itemsPerPage);
+  b.addEventListener('click', () => {
+    if (b.classList.contains('forward__btn')) {
+      if (appState.page < maxPage) {
+        appState.page += 1;
+      }
+    }
+    if (b.classList.contains('double-forward__btn')) {
+      appState.page = maxPage;
+    }
+    if (b.classList.contains('double-back__btn')) {
+      appState.page = minPage;
+    }
+    if (b.classList.contains('back__btn')) {
+      if (appState.page > minPage) {
+        appState.page -= 1;
+      }
+    }
+    renderCardsHandler(appState.page, appState.itemsPerPage, shuffledPets);
+  });
+});
+
+renderCardsHandler(appState.page, appState.itemsPerPage, shuffledPets);
