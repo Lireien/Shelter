@@ -113,6 +113,7 @@ body.locked {
 }
 .header__content {
   position: fixed;
+  max-width: 1280px;
   width: 100%;
   display: flex;
   justify-content: space-between;
