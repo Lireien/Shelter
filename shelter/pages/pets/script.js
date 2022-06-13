@@ -121,8 +121,7 @@ function closeMenu(event) {
 //popup
 
 function createPopup(name) {
-  const maxPetsList = makeMaxList(dataPets);
-  const pet = maxPetsList.filter((item) => item.name == name)[0];
+  const pet = dataPets.filter((item) => item.name == name)[0];
   const popupWindow = document.createElement('div');
   popupWindow.classList.add('popup');
   popupWindow.innerHTML = `<button type="button" class="popup__close-btn">
@@ -191,8 +190,6 @@ function convertArrToStr(arr) {
   }
 }
 
-popupOpenHandler();
-
 //pagination&slider
 
 const petsCardsWrapper = document.querySelector('.friends-cards__wrapper');
@@ -250,6 +247,7 @@ const renderCardsHandler = (pageNumber, itemsPerPage, items) => {
   renderedItemEls.forEach((el) => {
     const div = document.createElement('div');
     div.className = 'friends-card';
+    div.setAttribute('data-name', `${el.name}`);
     div.innerHTML = `
     <div class="card__img-wrapper">
     <img
@@ -259,7 +257,7 @@ const renderCardsHandler = (pageNumber, itemsPerPage, items) => {
     />
   </div>
   <h4 class="card__name">${el.name}</h4>
-  <a href="" class="anchor card__btn">Learn more</a>
+  <a href="##" class="anchor card__btn">Learn more</a>
     `;
     target.appendChild(div);
   });
@@ -327,6 +325,7 @@ paginationBtns.forEach((b) => {
 });
 
 renderCardsHandler(appState.page, appState.itemsPerPage, shuffledPets);
+popupOpenHandler();
 
 function random(a, b) {
   return Math.floor(a + Math.random() * (b + 1 - a));
